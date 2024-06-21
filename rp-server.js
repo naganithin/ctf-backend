@@ -5,8 +5,10 @@ const { collection, addDoc } = require("firebase/firestore");
 const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios');
+var cors = require('cors');
 const serviceAccount = require("./serviceAccountKey.json");
 require('dotenv').config();
+
 
 initializeApp({
     credential: cert(serviceAccount),
@@ -18,6 +20,7 @@ const app = express();
 const port = 3000;
 
 app.use(bodyParser.json());
+app.use(cors());
 
 async function createContact(contactData) {
     try {
@@ -232,6 +235,22 @@ app.get('/adjust-amount', async (req, res) => {
     }
 });
 
+app.get('/exchange-rate', async (req, res) => {
+    const { amount } = req.query;
+
+    if (!amount) {
+        return res.status(400).json({ error: 'Amount is required' });
+    }
+
+    try {
+        const response = await axios.get(`https://v6.exchangerate-api.com/v6/74ca8272aae924ccfbc55ff5/pair/USD/INR/${amount}`);
+        const exchangeRate = response.data.conversion_result;
+        res.json({ exchangeRate });
+    } catch (error) {
+        console.error('Error fetching exchange rate:', error);
+        res.status(500).json({ error: 'Failed to fetch exchange rate' });
+    }
+});
 
 app.post('/start-payctf-process', async (req, res) => {
     try {
@@ -242,6 +261,13 @@ app.post('/start-payctf-process', async (req, res) => {
         res.status(500).send('Error in the process');
     }
 });
+
+// Error handler middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
+});
+
 
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
