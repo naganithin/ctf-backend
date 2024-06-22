@@ -14,7 +14,7 @@
     ],
     "headers": [
         {
-            "source": "rp-server.js",
+            "source": "/(.*)",
             "headers": [
                 {
                     "key": "Access-Control-Allow-Credentials",
