@@ -20,7 +20,13 @@ const app = express();
 const port = 3000;
 
 app.use(bodyParser.json());
-app.use(cors());
+const corsOptions = {
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],  // Allow these methods
+    allowedHeaders: ['Content-Type', 'Authorization'],  // Allow these headers
+};
+
+app.use(cors(corsOptions));
 
 async function createContact(contactData) {
     try {
