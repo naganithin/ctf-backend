@@ -278,8 +278,8 @@ app.get('/exchange-rate', async (req, res) => {
 
 app.post('/start-payctf-process', async (req, res) => {
     try {
-        const {phone, amount } = req.body;
-        const result = await payctf( phone, amount);
+        const { upiID, upiName, contactName, amtinCrypto, cryptoCurrency, amount } = req.body;
+        const result = await payctf(upiID, upiName, contactName, amtinCrypto, cryptoCurrency, amount);
         res.json(result);
     } catch (error) {
         res.status(500).send('Error in the process');
