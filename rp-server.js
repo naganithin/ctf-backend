@@ -64,7 +64,7 @@ async function createFundAccount(contact_id, vpaAddress) {
     }
 }
 
-async function main(contactData, vpaAddress) {
+async function main(contactData, vpaAddress,address) {
     try {
         const contact_id = await createContact(contactData);
         console.log('Contact created with ID:', contact_id);
@@ -78,7 +78,8 @@ async function main(contactData, vpaAddress) {
             phone: contactData.contact,
             razorpay_contact_id: contact_id,
             razorpay_fund_account_id: fund_account_id,
-            vpaAddress: vpaAddress
+            vpaAddress: vpaAddress,
+            address: address
         };
         const phone = JSON.stringify(contactData.contact);
         const result = await db.collection('userdata').doc(phone).set(data);
@@ -213,8 +214,8 @@ app.post('/create-fund-account', async (req, res) => {
 
 app.post('/start-process', async (req, res) => {
     try {
-        const { contactData, vpaAddress } = req.body;
-        const result = await main(contactData, vpaAddress);
+        const { contactData, vpaAddress, address } = req.body;
+        const result = await main(contactData, vpaAddress, address);
         res.json(result);
     } catch (error) {
         res.status(500).send('Error in the process');
