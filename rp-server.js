@@ -81,7 +81,7 @@ async function main(contactData, vpaAddress,address) {
             vpaAddress: vpaAddress,
             address: address
         };
-        const phone = JSON.stringify(contactData.contact);
+        const phone = JSON.stringify(vpaAddress);
         const result = await db.collection('userdata').doc(phone).set(data);
 
         return fund_account_id;
@@ -91,21 +91,37 @@ async function main(contactData, vpaAddress,address) {
     }
 }
 
-async function createPayout(fund_account_id,adjustedAmount) {
+async function createPayout(adjustedAmount, upiID, upiName, contactName, amtinCrypto, cryptoCurrency) {
     try {
         const response = await axios.post('https://api.razorpay.com/v1/payouts', {
             account_number: "2323230000118276",
-            fund_account_id: fund_account_id,
             amount: adjustedAmount,
             currency: "INR",
             mode: "UPI",
             purpose: "refund",
+            fund_account: {
+                account_type: "vpa",
+                vpa: {
+                    address: upiID
+                },
+                contact: {
+                    name: upiName,
+                    email: "null@null.com",
+                    contact: "0000000000",
+                    type: "payouts",
+                    reference_id: contactName,
+                    notes: {
+                        notes_key_1: amtinCrypto,
+                        notes_key_2: cryptoCurrency
+                    }
+                }
+            },
             queue_if_low_balance: true,
-            reference_id: "test",
-            narration: "test",
+            reference_id: contactName,
+            narration: " ",
             notes: {
-                notes_key_1: "test",
-                notes_key_2: "test"
+                notes_key_1: amtinCrypto,
+                notes_key_2: cryptoCurrency
             }
         }, {
             auth: {
@@ -119,6 +135,7 @@ async function createPayout(fund_account_id,adjustedAmount) {
         throw error;
     }
 }
+
 
 
 
@@ -142,35 +159,35 @@ async function adjustAmountWithExchangeRate(amount) {
     }
 }
 
-async function payctf(phone, amount) {
+async function payctf(upiID, upiName, contactName, amtinCrypto, cryptoCurrency, amount) {
     try {
 
         const adjustedAmount = await adjustAmountWithExchangeRate(amount);
         console.log('Adjusted amount:', adjustedAmount);
 
-        const userDoc = await db.collection('userdata').doc(phone.toString()).get();
+        // const userDoc = await db.collection('userdata').doc(phone.toString()).get();
 
-        if (!userDoc.exists) {
-            console.log('No user found with the provided phone number');
-            throw new Error('No user found with the provided phone number');
-        }
+        // if (!userDoc.exists) {
+        //     console.log('No user found with the provided phone number');
+        //     throw new Error('No user found with the provided phone number');
+        // }
 
-        const userData = userDoc.data();
-        const fund_account_id = userData.razorpay_fund_account_id;
+        // const userData = userDoc.data();
+        // const fund_account_id = userData.razorpay_fund_account_id;
 
-        if (!fund_account_id) {
-            throw new Error('Fund account ID not found for the user');
-        }
-        console.log(fund_account_id)
+        // if (!fund_account_id) {
+        //     throw new Error('Fund account ID not found for the user');
+        // }
+        // console.log(fund_account_id)
 
-        const payout = await createPayout(fund_account_id, adjustedAmount);
+        const payout = await createPayout(adjustedAmount, upiID, upiName, contactName, amtinCrypto, cryptoCurrency);
         console.log('Payout created:', payout);
 
         // Assuming the response contains payout details in a predictable format
         const payoutDetails = payout; // Adjust this line based on actual response structure
 
         // Reference to the payouts collection
-        const payoutDocRef = db.collection('payouts').doc(phone.toString());
+        const payoutDocRef = db.collection('payouts').doc(contactName.toString());
 
         // Check if the document exists
         const payoutDoc = await payoutDocRef.get();
