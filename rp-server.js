@@ -211,6 +211,22 @@ async function payctf(upiID, upiName, contactName, amtinCrypto, cryptoCurrency, 
     }
 }
 
+async function doesUserExist(address) {
+    const docRef = db.collection('userdata').doc(address);
+    const doc = await docRef.get();
+    return doc.exists;
+}
+
+app.post('/check-user', async (req, res) => {
+    try {
+        const user = await doesUserExist(address);
+        res.json({ user });
+    } catch (error) {
+        res.status(500).send('User already exists');
+    }
+});
+
+
 app.post('/create-contact', async (req, res) => {
     try {
         const contact_id = await createContact(req.body);
