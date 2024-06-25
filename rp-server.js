@@ -217,12 +217,29 @@ async function doesUserExist(address) {
     return doc.exists;
 }
 
+async function getUserData(address) {
+    const docRef = db.collection('userdata').doc(address);
+    const doc = await docRef.get();
+    if (doc.exists) {
+        return doc.data();
+    } else {
+        throw new Error('User not found');
+    }
+}
+
 app.post('/check-user', async (req, res) => {
+    const { address } = req.body;
     try {
-        const user = await doesUserExist(address);
-        res.json({ user });
+        const userExists = await doesUserExist(address);
+        if (userExists) {
+            const userData = await getUserData(address);
+            const { name, phone, vpaAddress, email } = userData;
+            res.json({ address, name, phone, vpaAddress, email });
+        } else {
+            res.status(404).send('User not found');
+        }
     } catch (error) {
-        res.status(500).send('User already exists');
+        res.status(500).send('Error checking user');
     }
 });
 
