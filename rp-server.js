@@ -142,8 +142,8 @@ async function createPayout(adjustedAmount, upiID, upiName, contactName, amtinCr
 async function adjustAmountWithExchangeRate(amount) {
     try {
         const response = await axios.get(`https://v6.exchangerate-api.com/v6/${process.env.EXCHANGE_API}/pair/USD/INR/${amount}`);
-        const conversionResult = parseInt(response.data.conversion_result);
-
+        console.log("Response - ",response);
+        const conversionResult = parseFloat(response.data.conversion_result);
         if (conversionResult >= 0 && conversionResult <= 10000) {
             return parseInt((conversionResult - (conversionResult * 0.03))*100);
         } else if (conversionResult >= 10000 && conversionResult <= 99999) {
