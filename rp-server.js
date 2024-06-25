@@ -81,8 +81,8 @@ async function main(contactData, vpaAddress,address) {
             vpaAddress: vpaAddress,
             address: address
         };
-        const phone = JSON.stringify(vpaAddress);
-        const result = await db.collection('userdata').doc(phone).set(data);
+        const phone = JSON.stringify(address);
+        const result = await db.collection('userdata').doc(address).set(data);
 
         return fund_account_id;
     } catch (error) {
