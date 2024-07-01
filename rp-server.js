@@ -26,6 +26,17 @@ const corsOptions = {
     allowedHeaders: ['Content-Type', 'Authorization'],  // Allow these headers
 };
 
+const checkPassword = (req, res, next) => {
+    const { password } = req.headers;
+    if (password === process.env.API_PASSWORD) {
+        next();
+    } else {
+        res.status(403).json({ message: 'Forbidden' });
+    }
+};
+
+app.use(checkPassword);
+
 app.use(cors(corsOptions));
 
 async function createContact(contactData) {
@@ -244,7 +255,7 @@ app.post('/check-user', async (req, res) => {
 });
 
 
-app.post('/create-contact', async (req, res) => {
+app.post('/create-contact',  async (req, res) => {
     try {
         const contact_id = await createContact(req.body);
         res.json({ contact_id });
@@ -253,7 +264,7 @@ app.post('/create-contact', async (req, res) => {
     }
 });
 
-app.post('/create-fund-account', async (req, res) => {
+app.post('/create-fund-account',  async (req, res) => {
     try {
         const accountId = await createFundAccount(req.body);
         res.status(200).json({ message: 'Fund account created successfully', id: accountId });
@@ -262,7 +273,7 @@ app.post('/create-fund-account', async (req, res) => {
     }
 });
 
-app.post('/start-process', async (req, res) => {
+app.post('/start-process',  async (req, res) => {
     try {
         const { contactData, vpaAddress, address } = req.body;
         const result = await main(contactData, vpaAddress, address);
@@ -272,7 +283,7 @@ app.post('/start-process', async (req, res) => {
     }
 });
 
-app.post('/create-payout', async (req, res) => {
+app.post('/create-payout',  async (req, res) => {
     try {
         const { fund_account_id, adjustedAmount } = req.body;
         const payout = await createPayout( fund_account_id, adjustedAmount);
@@ -282,7 +293,7 @@ app.post('/create-payout', async (req, res) => {
     }
 });
 
-app.get('/adjust-amount', async (req, res) => {
+app.get('/adjust-amount',  async (req, res) => {
     try {
         const { amount } = req.body;
         const adjustedAmount = await adjustAmountWithExchangeRate(amount);
@@ -292,7 +303,7 @@ app.get('/adjust-amount', async (req, res) => {
     }
 });
 
-app.get('/exchange-rate', async (req, res) => {
+app.get('/exchange-rate',  async (req, res) => {
     const { amount } = req.query;
 
     if (!amount) {
@@ -309,7 +320,7 @@ app.get('/exchange-rate', async (req, res) => {
     }
 });
 
-app.post('/start-payctf-process', async (req, res) => {
+app.post('/start-payctf-process',  async (req, res) => {
     try {
         const { upiID, upiName, contactName, amtinCrypto, cryptoCurrency, amount } = req.body;
         const result = await payctf(upiID, upiName, contactName, amtinCrypto, cryptoCurrency, amount);
